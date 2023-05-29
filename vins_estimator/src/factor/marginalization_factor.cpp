@@ -301,8 +301,8 @@ void MarginalizationInfo::marginalize()
     Eigen::VectorXd S_sqrt = S.cwiseSqrt();
     Eigen::VectorXd S_inv_sqrt = S_inv.cwiseSqrt();
 
-    linearized_jacobians = S_sqrt.asDiagonal() * saes2.eigenvectors().transpose();
-    linearized_residuals = S_inv_sqrt.asDiagonal() * saes2.eigenvectors().transpose() * b;
+    linearized_jacobians = S_sqrt.asDiagonal() * saes2.eigenvectors().transpose();//J' of J'TJ' or L'T of L'L'T and L'=U*sqrt_S
+    linearized_residuals = S_inv_sqrt.asDiagonal() * saes2.eigenvectors().transpose() * b;//L'^(-1)b = sqrt_S^(-1)U^T*b
     //std::cout << A << std::endl
     //          << std::endl;
     //std::cout << linearized_jacobians << std::endl;
@@ -387,6 +387,7 @@ bool MarginalizationFactor::Evaluate(double const *const *parameters, double *re
                 int idx = marginalization_info->keep_block_idx[i] - m;
                 Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> jacobian(jacobians[i], n, size);
                 jacobian.setZero();
+                // it seems here uses fej for this factor, which may save the calculation time cost and ensures fej, but lose the optimization principle of the slope or hessian in essence
                 jacobian.leftCols(local_size) = marginalization_info->linearized_jacobians.middleCols(idx, local_size);
             }
         }

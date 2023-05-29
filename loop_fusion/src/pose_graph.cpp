@@ -755,8 +755,8 @@ void PoseGraph::optimize6DoF()
             cur_kf->getPose(cur_t, cur_r);
             cur_kf->getVioPose(vio_t, vio_r);
             m_drift.lock();
-            r_drift = cur_r * vio_r.transpose();
-            t_drift = cur_t - r_drift * vio_t;
+            r_drift = cur_r * vio_r.transpose();//Rww0
+            t_drift = cur_t - r_drift * vio_t;//tww0=twb-Rww0*tw0b
             m_drift.unlock();
             //cout << "t_drift " << t_drift.transpose() << endl;
             //cout << "r_drift " << Utility::R2ypr(r_drift).transpose() << endl;
@@ -908,6 +908,13 @@ void PoseGraph::savePoseGraph()
     printf("pose graph saving... \n");
     string file_path = POSE_GRAPH_SAVE_PATH + "pose_graph.txt";
     pFile = fopen (file_path.c_str(),"w");
+    if (NULL == pFile) {
+        fclose(pFile);
+
+        printf("save pose graph failed : %f s\n", tmp_t.toc() / 1000);
+        m_keyframelist.unlock();
+        return;
+    }
     //fprintf(pFile, "index time_stamp Tx Ty Tz Qw Qx Qy Qz loop_index loop_info\n");
     list<KeyFrame*>::iterator it;
     for (it = keyframelist.begin(); it != keyframelist.end(); it++)

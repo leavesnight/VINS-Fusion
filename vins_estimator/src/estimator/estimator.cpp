@@ -1087,7 +1087,7 @@ void Estimator::optimization()
             }
 
             if(STEREO && it_per_frame.is_stereo)
-            {                
+            {
                 Vector3d pts_j_right = it_per_frame.pointRight;
                 if(imu_i != imu_j)
                 {
